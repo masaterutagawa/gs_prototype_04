@@ -1,8 +1,6 @@
 <?php
 session_start();
 
-var_dump($_SESSION);
-
 $user_name = '';
 if (!isset($_SESSION['chk_ssid']) || $_SESSION['chk_ssid'] != session_id()) {
     $user_name = '誰か';
@@ -17,9 +15,23 @@ include('function.php');
 $pdo = db_connect();
 
 // SQL作成&実行
-$sql = "SELECT * FROM dev13_diary ORDER BY registration_date DESC";
-$stmt = $pdo->prepare($sql);
+// $sql = "SELECT * FROM dev13_diary ORDER BY registration_date DESC";
 
+$sql = "SELECT *
+FROM
+    dev13_diary
+LEFT OUTER JOIN(
+    SELECT diary_id,
+        COUNT(like_id) AS like_count
+    FROM
+        dev13_like_table
+    GROUP BY
+        diary_id
+) AS result_table
+ON
+    dev13_diary.diary_id = result_table.diary_id";
+
+$stmt = $pdo->prepare($sql);
 
 try {
     $status = $stmt->execute();
@@ -46,9 +58,10 @@ foreach ($result as $record) {
                 <div class=\"relative mt-auto p-4\">
                 <span class=\"block text-sm text-gray-200\">{$record["registration_date"]}</span>
                 <h2 class=\"mb-2 text-xl font-semibold text-white transition duration-100\">{$record["today_events"]}</h2>
-                <span class=\"font-semibold text-white\">この日の記録を確認する</span>
+                <span class=\"font-semibold text-white\">この日の記録を確認する</span> <span class=\"font-semibold text-white\">LIKE数{$record["like_count"]}</span>
                 </div>
             </a>
+            
             ";
     } else {
         $output .= "
@@ -58,7 +71,7 @@ foreach ($result as $record) {
                 <div class=\"relative mt-auto p-4\">
                 <span class=\"block text-sm text-gray-200\">{$record["registration_date"]}</span>
                 <h2 class=\"mb-2 text-xl font-semibold text-white transition duration-100\">{$record["today_events"]}</h2>
-                <span class=\"font-semibold text-white\">この日の記録を確認する</span>
+                <span class=\"font-semibold text-white\">この日の記録を確認する</span> <span class=\"font-semibold text-white\">LIKE数{$record["like_count"]}</span>
                 </div>
             </a>
             ";
