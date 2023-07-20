@@ -103,8 +103,6 @@ if ($status02 == false) {
     // $row["id"] $row["name"]などでデータをとりだせます
 }
 
-print_r($row03["user_name"])
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
